@@ -20,11 +20,13 @@ class UserRegister(Resource):
         # print(pas)
         user = mongo.db.users
         pw_hash = bcrypt.generate_password_hash(password)
+        print(pw_hash)
         for u in user.find():
           if u['username'] == username:
             return {'message': 'this user name is existed', 'code': '404'}
         user_id = user.insert({'username': username, 'password': pw_hash})
         new_user = user.find_one({'_id': user_id})
+        print(pw_hash)
         return {'message': 'Register Success','code': '200'}, 200
 
 
@@ -34,16 +36,20 @@ class USerSignIn(Resource):
         password = request.json['password']
         user = mongo.db.users
         pw_hash = bcrypt.generate_password_hash(password)
+        u = user.find_one({'username': username})
+        print(u)
         if user.find_one({'username': username}):
-            for u in user.find():
-                if bcrypt.check_password_hash(u['password'], password):
-                    return {'message': 'Log In successfully', 'code': '200'}, 200
-                else:
-                    return {'message': 'wrong password', 'code': '404'}
+            print(password)
+            print(u['password'])
+            print(u['username'])
+            if bcrypt.check_password_hash(u['password'], str(password)):
+                return {'message': 'Log In successfully', 'code': '200'}, 200
+            else:
+                return {'message': 'wrong password', 'code': '404'}
         return {'message': 'please check your username again','code': '404'}
 
 
 if __name__ == '__main__':
     api.add_resource(UserRegister, '/register')
     api.add_resource(USerSignIn, '/signin')
-    app.run(host='192.168.1.117', debug=True)
+    app.run(host='192.168.1.114', debug=True)
